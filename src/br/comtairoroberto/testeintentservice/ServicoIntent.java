@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 public class ServicoIntent extends IntentService implements CountListener{
 	private int count;
 	private boolean active;
 	private boolean stopAll;
+	private ResultReceiver resultReceiver;
 	private Controller controller = new Controller();
 	
 	public ServicoIntent() {
@@ -45,6 +47,9 @@ public class ServicoIntent extends IntentService implements CountListener{
 			
 			if (deligar == 1) {
 				stopAll = false;
+			}else{
+				stopAll = true;
+				resultReceiver = intent.getParcelableExtra("receiver");
 			}
 		}
 		
@@ -57,13 +62,20 @@ public class ServicoIntent extends IntentService implements CountListener{
 		// TODO Auto-generated method stub
 		while (stopAll && active && count < 5) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			count++;
 			Log.i("Script", "Contador"+ count );
+			
+			//Coloca o contador dentro de un Bundle para envia-lo a intent
+			Bundle bundle = new Bundle();
+			bundle.putInt("count", count);
+			
+			//Envia um conteudo pelo resultReceiver
+			resultReceiver.send(1, bundle);
 		}
 		active = true;
 		count = 0;
